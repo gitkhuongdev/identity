@@ -1,6 +1,8 @@
 
 **/target/
 **/build/
+**/identity/
+
 
 /.mvn/wrapper/maven-wrapper.properties
 
