@@ -6,7 +6,6 @@ import com.khuongdev.identity_service.dto.respone.UserResponse;
 import com.khuongdev.identity_service.entity.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
-import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
