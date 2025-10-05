@@ -20,15 +20,15 @@ public class UserMapperImpl implements UserMapper {
             return null;
         }
 
-        User user = new User();
+        User.UserBuilder user = User.builder();
 
-        user.setUsername( request.getUsername() );
-        user.setPassword( request.getPassword() );
-        user.setFirstName( request.getFirstName() );
-        user.setLastName( request.getLastName() );
-        user.setDob( request.getDob() );
+        user.username( request.getUsername() );
+        user.password( request.getPassword() );
+        user.firstName( request.getFirstName() );
+        user.lastName( request.getLastName() );
+        user.dob( request.getDob() );
 
-        return user;
+        return user.build();
     }
 
     @Override
