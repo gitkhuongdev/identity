@@ -8,11 +8,13 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
+import java.util.Set;
 // Đây là một Class dùng để khai báo các cột trong DB User
 // Khai báo để spring biết class User là 1 table thì dùng @Entity
 
 @Entity
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -28,4 +30,5 @@ public class User {
      String firstName;
      String lastName;
      LocalDate dob;
+     Set<String> roles; // Set khác List ở chỗ các item sẽ là duy nhất
 }
