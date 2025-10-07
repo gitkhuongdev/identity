@@ -4,6 +4,7 @@ import com.khuongdev.identity_service.dto.request.UserCreationRequest;
 import com.khuongdev.identity_service.dto.request.UserUpdateRequest;
 import com.khuongdev.identity_service.dto.respone.UserResponse;
 import com.khuongdev.identity_service.entity.User;
+import com.khuongdev.identity_service.enums.Role;
 import com.khuongdev.identity_service.exception.AppException;
 import com.khuongdev.identity_service.exception.ErrorCode;
 import com.khuongdev.identity_service.mapper.UserMapper;
@@ -12,10 +13,10 @@ import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
 
 // Đánh dấu đây là 1 service
@@ -30,8 +31,9 @@ public class UserService {
 //    @Autowired
     UserRepository userRepository;
     UserMapper userMapper;
+    PasswordEncoder passwordEncoder;
     // Method tạo User
-    public User createUser(@Valid UserCreationRequest request) {
+    public UserResponse createUser(@Valid UserCreationRequest request) {
 //        User user = new User();
         // Đoạn này GlobalHandler exception sẽ xử lý để lấy message để trả về
         // Kết hợp với hàm existByUsername trong userRepo để JPA check username trong request có tồn tại hay chưa rồi trả về message
@@ -39,22 +41,17 @@ public class UserService {
             throw new AppException(ErrorCode.USER_EXISTED);
 
         User user = userMapper.toUser(request);
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-//        user.setUsername(request.getUsername());
-//        user.setPassword(request.getPassword());
-//        user.setFirstName(request.getFirstName());
-//        user.setLastName(request.getLastName());
-//        user.setDob(request.getDob());
-        return  userRepository.save(user);
+        // Set role User
+        HashSet<String> roles = new HashSet<>();
+        roles.add(Role.USER.name());
+        user.setRoles(roles);
+
+        return userMapper.toUserResponse(userRepository.save(user));
     }
 
     public UserResponse updateUser(String userId, UserUpdateRequest request) {
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-//        user.setPassword(request.getPassword());
-//        user.setFirstName(request.getFirstName());
-//        user.setLastName(request.getLastName());
-//        user.setDob(request.getDob());
         userMapper.updateUser(user, request);
         return userMapper.toUserResponse(userRepository.save(user));
     }
@@ -63,8 +60,8 @@ public class UserService {
         userRepository.deleteById(userId);
     }
 
-    public List<User> getUsers(){
-        return  userRepository.findAll();
+    public List<UserResponse> getUsers() {
+        return userRepository.findAll().stream().map(userMapper::toUserResponse).toList();
     }
 
     public UserResponse getUser(String id){
