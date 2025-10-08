@@ -13,15 +13,21 @@ import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 
 // Đánh dấu đây là 1 service
 // Spring sẽ tạo bean cho class này, bean có scope mặc định là singleton.
 // Thường dùng để chứa logic nghiệp vụ (business logic)
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -50,6 +56,15 @@ public class UserService {
         return userMapper.toUserResponse(userRepository.save(user));
     }
 
+    public UserResponse getMyInfo(){
+        var context = SecurityContextHolder.getContext();
+        String name = context.getAuthentication().getName();
+
+        User user = userRepository.findByUsername(name).orElseThrow(() -> new AppException(ErrorCode.USER_EXISTED));
+
+        return userMapper.toUserResponse(user);
+    }
+
     public UserResponse updateUser(String userId, UserUpdateRequest request) {
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
         userMapper.updateUser(user, request);
@@ -60,11 +75,15 @@ public class UserService {
         userRepository.deleteById(userId);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     public List<UserResponse> getUsers() {
+        log.info("In method get user");
         return userRepository.findAll().stream().map(userMapper::toUserResponse).toList();
     }
 
+    @PostAuthorize("returnObject.username == authentication.name")
     public UserResponse getUser(String id){
+        log.info("In method get user by ID");
 //        Phần message này chỉ xuất hiện khi thêm phần xử lý trong exception
         return userMapper.toUserResponse(userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found")));
     }
