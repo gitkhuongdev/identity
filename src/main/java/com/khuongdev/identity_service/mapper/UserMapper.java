@@ -13,4 +13,8 @@ public interface UserMapper {
 //    @Mapping(source = "firstName", target = "lastName")
     UserResponse toUserResponse(User user);
     void updateUser(@MappingTarget User user, UserUpdateRequest request);
+
+    default String roleToString(com.khuongdev.identity_service.entity.Role role) {
+        return role == null ? null : role.getName();
+    }
 }
