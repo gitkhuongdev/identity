@@ -8,6 +8,7 @@ import com.khuongdev.identity_service.enums.Role;
 import com.khuongdev.identity_service.exception.AppException;
 import com.khuongdev.identity_service.exception.ErrorCode;
 import com.khuongdev.identity_service.mapper.UserMapper;
+import com.khuongdev.identity_service.repository.RoleRepository;
 import com.khuongdev.identity_service.repository.UserRepository;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -37,6 +38,7 @@ public class UserService {
 //    @Autowired
     UserRepository userRepository;
     UserMapper userMapper;
+    RoleRepository roleRepository;
     PasswordEncoder passwordEncoder;
     // Method tạo User
     public UserResponse createUser(@Valid UserCreationRequest request) {
@@ -68,7 +70,13 @@ public class UserService {
 
     public UserResponse updateUser(String userId, UserUpdateRequest request) {
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+
         userMapper.updateUser(user, request);
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+
+        var roles = roleRepository.findAllById(request.getRoles());
+        user.setRoles(new HashSet<>(roles));
+
         return userMapper.toUserResponse(userRepository.save(user));
     }
 
