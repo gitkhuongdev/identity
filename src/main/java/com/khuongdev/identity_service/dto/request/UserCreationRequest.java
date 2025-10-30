@@ -1,6 +1,7 @@
 package com.khuongdev.identity_service.dto.request;
 
 import com.khuongdev.identity_service.exception.ErrorCode;
+import com.khuongdev.identity_service.validator.DobConstraint;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -21,5 +22,8 @@ public class UserCreationRequest {
      String password;
      String firstName;
      String lastName;
+
+     // Khai báo và sử dụng annotation vừa custom để validate
+     @DobConstraint(min = 16, message = "INVALID_DOB")
      LocalDate dob;
 }
