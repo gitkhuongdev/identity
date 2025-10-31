@@ -2,11 +2,14 @@ package com.khuongdev.identity_service.service;
 
 import com.khuongdev.identity_service.dto.request.AuthenticationRequest;
 import com.khuongdev.identity_service.dto.request.IntrospectRequest;
+import com.khuongdev.identity_service.dto.request.LogoutRequest;
 import com.khuongdev.identity_service.dto.respone.AuthenticationResponse;
 import com.khuongdev.identity_service.dto.respone.IntrospectResponse;
+import com.khuongdev.identity_service.entity.InvalidatedToken;
 import com.khuongdev.identity_service.entity.User;
 import com.khuongdev.identity_service.exception.AppException;
 import com.khuongdev.identity_service.exception.ErrorCode;
+import com.khuongdev.identity_service.repository.InvalidatedTokenRepository;
 import com.khuongdev.identity_service.repository.UserRepository;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
@@ -27,6 +30,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.StringJoiner;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.CollectionUtils;
@@ -37,6 +41,7 @@ import org.springframework.util.CollectionUtils;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AuthenticationService {
     UserRepository userRepository;
+    InvalidatedTokenRepository invalidatedTokenRepository;
 
     @NonFinal
     @Value("${jwt.signerKey}")
@@ -44,17 +49,15 @@ public class AuthenticationService {
 
     public IntrospectResponse introspect(IntrospectRequest request) throws JOSEException, ParseException {
         var token = request.getToken();
+        boolean isValid = true;
+        try {
+            verifyToken(token);
+        } catch (AppException e) {
+            isValid = false;
+        }
 
-        JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
-
-        SignedJWT signedJWT = SignedJWT.parse(token);
-
-        Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
-
-        var verified = signedJWT.verify(verifier);
-
-        return  IntrospectResponse.builder()
-                .valid(verified && expiryTime.after(new Date()))
+        return IntrospectResponse.builder()
+                .valid(isValid)
                 .build();
     }
 
@@ -85,6 +88,8 @@ public class AuthenticationService {
                 .expirationTime(new Date(
                         Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli()
                 ))
+                // Thêm claim để lưu JWTid dùng để logout
+                .jwtID(UUID.randomUUID().toString())
                 // Phần scope được hỗ trợ dùng để phân quyền theo chuân OAuth2 của spring
                 // Nó sẽ thêm 1 key scope trong json có value là roles của user
                 .claim("scope", buildScope(user))
@@ -101,6 +106,40 @@ public class AuthenticationService {
             log.error("Cannot create token",e);
             throw new RuntimeException(e);
         }
+    }
+
+    public void logout(LogoutRequest request) throws ParseException, JOSEException {
+        var signToken = verifyToken(request.getToken());
+
+        String jit = signToken.getJWTClaimsSet().getJWTID();
+        Date expiryTime = signToken.getJWTClaimsSet().getExpirationTime();
+
+        InvalidatedToken invalidatedToken = InvalidatedToken.builder()
+                .id(jit)
+                .expiryTime(expiryTime)
+                .build();
+
+        invalidatedTokenRepository.save(invalidatedToken);
+    }
+
+    private SignedJWT verifyToken(String token) throws JOSEException, ParseException {
+        JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
+
+        SignedJWT signedJWT = SignedJWT.parse(token);
+
+        Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+
+        var verified = signedJWT.verify(verifier);
+
+        if (!(verified && expiryTime.after(new Date())))
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
+
+        // Kiểm tra xem token đã logout hay chưa
+        if(invalidatedTokenRepository.existsById(signedJWT.getJWTClaimsSet().getJWTID()))
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
+
+
+        return signedJWT;
     }
 
     private String buildScope(User user){
