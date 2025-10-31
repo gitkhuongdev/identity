@@ -43,7 +43,7 @@ public class UserService {
     // Method tạo User
     public UserResponse createUser(@Valid UserCreationRequest request) {
 //        User user = new User();
-        // Đoạn này GlobalHandler exception sẽ xử lý để lấy message để trả về
+        // Đoạn này GlobalHandler AppException sẽ xử lý để lấy mã lỗi để trả về cho api mã + message bị lỗi
         // Kết hợp với hàm existByUsername trong userRepo để JPA check username trong request có tồn tại hay chưa rồi trả về message
         if (userRepository.existsByUsername(request.getUsername()))
             throw new AppException(ErrorCode.USER_EXISTED);

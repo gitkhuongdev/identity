@@ -1,6 +1,5 @@
 package com.khuongdev.identity_service.dto.request;
 
-import com.khuongdev.identity_service.exception.ErrorCode;
 import com.khuongdev.identity_service.validator.DobConstraint;
 import jakarta.validation.constraints.Size;
 import lombok.*;
