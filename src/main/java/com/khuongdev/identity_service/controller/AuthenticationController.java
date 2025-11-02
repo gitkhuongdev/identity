@@ -1,9 +1,6 @@
 package com.khuongdev.identity_service.controller;
 
-import com.khuongdev.identity_service.dto.request.ApiResponse;
-import com.khuongdev.identity_service.dto.request.AuthenticationRequest;
-import com.khuongdev.identity_service.dto.request.IntrospectRequest;
-import com.khuongdev.identity_service.dto.request.LogoutRequest;
+import com.khuongdev.identity_service.dto.request.*;
 import com.khuongdev.identity_service.dto.respone.AuthenticationResponse;
 import com.khuongdev.identity_service.dto.respone.IntrospectResponse;
 import com.khuongdev.identity_service.service.AuthenticationService;
@@ -43,6 +40,15 @@ public class AuthenticationController {
             throws ParseException, JOSEException {
         authenticationService.logout(request);
         return ApiResponse.<Void>builder()
+                .build();
+    }
+
+    @PostMapping("/refresh")
+    ApiResponse<AuthenticationResponse> authenticate(@RequestBody RefreshRequest request)
+            throws ParseException, JOSEException{
+        var result = authenticationService.refreshToken(request);
+        return ApiResponse.<AuthenticationResponse>builder()
+                .result(result)
                 .build();
     }
 }
