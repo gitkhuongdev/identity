@@ -14,7 +14,7 @@ import java.time.LocalDate;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserCreationRequest {
     // Thêm annotation Size để validate username
-    @Size(min = 3, max = 50, message = "USERNAME_INVALID")
+    @Size(min = 4, max = 50, message = "USERNAME_INVALID")
      String username;
     // Thêm annotation Size để validate password
     @Size(min = 8, message = "INVALID_PASSWORD")
