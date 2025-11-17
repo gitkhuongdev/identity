@@ -10,6 +10,8 @@ import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,6 +22,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserController {
+    private static final Log log = LogFactory.getLog(UserController.class);
     UserService userService;
 
     // @PostMapping("/users") khai báo từng mapping
@@ -28,6 +31,9 @@ public class UserController {
     // User createUser(@RequestBody @Valid UserCreationRequest request){
     // Thay vì chỉ trả về thông tin user thì sẽ trả về theo dạng chuẩn hóa
     ApiResponse<UserResponse> createUser(@RequestBody @Valid UserCreationRequest request) {
+
+        log.info("Controller: create user");
+
         return ApiResponse.<UserResponse>builder()
                 .result(userService.createUser(request))
                 .build();
