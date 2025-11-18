@@ -79,6 +79,11 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>
+            <scope>test</scope>
+        </dependency>
 
         <!--Dùng trong unit test mà ko cần kết nối tới DB thực -->
         <dependency>
@@ -92,6 +97,7 @@
 
 	<build>
 		<plugins>
+
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
@@ -133,6 +139,34 @@
                         <arg>-Amapstruct.defaultComponentModel=spring</arg>
                         <arg>-Amapstruct.verbose=true</arg>
                     </compilerArgs>
+                </configuration>
+            </plugin>
+            <!-- Plugin dùng để đo lường java code coverage / lệnh để sử dụng ./mvnw test jacoco:report-->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.12</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <excludes>
+                        <exclude>com/khuongdev/identity_service/dto/**</exclude>
+                        <exclude>com/khuongdev/identity_service/entity/**</exclude>
+                        <exclude>com/khuongdev/identity_service/mapper/**</exclude>
+                        <exclude>com/khuongdev/identity_service/configuration/**</exclude>
+                    </excludes>
                 </configuration>
             </plugin>
 		</plugins>
