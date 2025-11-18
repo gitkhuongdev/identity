@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -25,7 +26,15 @@ public class ApplicationInitConfig {
     private PasswordEncoder passwordEncoder;
 
     @Bean
+    // Thêm điều kiện cho Bean khi test mà ko cần kết nối DB
+    // Bean này chỉ được khởi tạo khi có spring.datasource.driverClassName là com.mysql.jdbc.Driver
+    // Nghĩa là có kết nối tới mySQL của dự án
+    @ConditionalOnProperty(prefix = "spring",
+            value = "datasource.driverClassName",
+            havingValue = "com.mysql.jdbc.Driver"
+    )
     ApplicationRunner applicationRunner(UserRepository userRepository){
+        log.info("Init Application.....");
         return  args -> {
           if (userRepository.findByUsername("admin").isEmpty()){
               var roles = new HashSet<String>();
