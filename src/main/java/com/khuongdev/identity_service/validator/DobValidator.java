@@ -1,11 +1,11 @@
 package com.khuongdev.identity_service.validator;
 
-import jakarta.validation.ConstraintValidator;
-import jakarta.validation.ConstraintValidatorContext;
-
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
+
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 // Best practice: Mỗi annotation chỉ nên xử lý cho 1 validation cụ thể
 
@@ -17,12 +17,11 @@ public class DobValidator implements ConstraintValidator<DobConstraint, LocalDat
     @Override
     // Sẽ được khởi tạo khi dùng và lấy các giá trị của annotation đó
     public boolean isValid(LocalDate value, ConstraintValidatorContext context) {
-        if(Objects.isNull(value))
-            return true;
+        if (Objects.isNull(value)) return true;
         // Tính độ tuổi khi người dùng nhập vào
         long years = ChronoUnit.YEARS.between(value, LocalDate.now());
 
-        return years >=min;
+        return years >= min;
     }
 
     @Override

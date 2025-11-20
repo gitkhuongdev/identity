@@ -1,9 +1,9 @@
 package com.khuongdev.identity_service.dto.respone;
 
+import java.util.Set;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.util.Set;
 
 @Data
 @NoArgsConstructor

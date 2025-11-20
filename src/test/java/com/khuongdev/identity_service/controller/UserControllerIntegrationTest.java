@@ -1,10 +1,7 @@
 package com.khuongdev.identity_service.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.khuongdev.identity_service.dto.request.UserCreationRequest;
-import com.khuongdev.identity_service.dto.respone.UserResponse;
-import lombok.extern.slf4j.Slf4j;
+import java.time.LocalDate;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +17,12 @@ import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.time.LocalDate;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.khuongdev.identity_service.dto.request.UserCreationRequest;
+import com.khuongdev.identity_service.dto.respone.UserResponse;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @SpringBootTest
@@ -32,23 +34,23 @@ public class UserControllerIntegrationTest {
     static final MySQLContainer<?> MY_SQL_CONTAINER = new MySQLContainer<>("mysql:8.0.36-debian");
 
     @DynamicPropertySource
-    static void configureDatasource(DynamicPropertyRegistry registry){
+    static void configureDatasource(DynamicPropertyRegistry registry) {
         registry.add("spring.datasource.url", MY_SQL_CONTAINER::getJdbcUrl);
         registry.add("spring.datasource.username", MY_SQL_CONTAINER::getUsername);
         registry.add("spring.datasource.password", MY_SQL_CONTAINER::getPassword);
         registry.add("spring.datasource.driver-class-name", () -> "com.mysql.jdbc.Driver");
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "update");
-
     }
 
     @Autowired
     private MockMvc mockMvc;
+
     private UserCreationRequest request;
     private UserResponse userResponse;
     private LocalDate dob;
 
     @BeforeEach
-    void initData(){
+    void initData() {
         dob = LocalDate.of(2004, 1, 1);
         request = UserCreationRequest.builder()
                 .username("john")
@@ -69,26 +71,22 @@ public class UserControllerIntegrationTest {
 
     @Test
     void createUser_validRequest_success() throws Exception {
-      // GIVEN
+        // GIVEN
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         String content = objectMapper.writeValueAsString(request);
 
-
-//      // WHEN
-        var response = mockMvc.perform(MockMvcRequestBuilders
-                .post("/users")
-                .contentType(MediaType.APPLICATION_JSON_VALUE).content(content))
+        //      // WHEN
+        var response = mockMvc.perform(MockMvcRequestBuilders.post("/users")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(content))
                 // THEN
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("code").value(1000))
                 .andExpect(MockMvcResultMatchers.jsonPath("result.username").value("john"))
                 .andExpect(MockMvcResultMatchers.jsonPath("result.firstName").value("John"))
-                .andExpect(MockMvcResultMatchers.jsonPath("result.lastName").value("Doe")
-        );
+                .andExpect(MockMvcResultMatchers.jsonPath("result.lastName").value("Doe"));
 
         log.info("Result: {}", response.andReturn().getResponse().getContentAsString());
     }
-
 }
-
