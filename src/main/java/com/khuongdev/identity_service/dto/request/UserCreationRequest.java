@@ -1,11 +1,13 @@
 package com.khuongdev.identity_service.dto.request;
 
-import com.khuongdev.identity_service.validator.DobConstraint;
+import java.time.LocalDate;
+
 import jakarta.validation.constraints.Size;
+
+import com.khuongdev.identity_service.validator.DobConstraint;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
@@ -15,14 +17,15 @@ import java.time.LocalDate;
 public class UserCreationRequest {
     // Thêm annotation Size để validate username
     @Size(min = 4, max = 50, message = "USERNAME_INVALID")
-     String username;
+    String username;
     // Thêm annotation Size để validate password
     @Size(min = 8, message = "INVALID_PASSWORD")
-     String password;
-     String firstName;
-     String lastName;
+    String password;
 
-     // Khai báo và sử dụng annotation vừa custom để validate
-     @DobConstraint(min = 16, message = "INVALID_DOB")
-     LocalDate dob;
+    String firstName;
+    String lastName;
+
+    // Khai báo và sử dụng annotation vừa custom để validate
+    @DobConstraint(min = 16, message = "INVALID_DOB")
+    LocalDate dob;
 }

@@ -1,21 +1,23 @@
 package com.khuongdev.identity_service.controller;
 
-import com.khuongdev.identity_service.dto.request.ApiResponse;
-import com.khuongdev.identity_service.dto.request.UserCreationRequest;
-import com.khuongdev.identity_service.dto.request.UserUpdateRequest;
-import com.khuongdev.identity_service.dto.respone.UserResponse;
-import com.khuongdev.identity_service.entity.User;
-import com.khuongdev.identity_service.service.UserService;
+import java.util.List;
+
 import jakarta.validation.Valid;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-// Khai báo để spring biết đây là controller xử lý endpoint
+import com.khuongdev.identity_service.dto.request.ApiResponse;
+import com.khuongdev.identity_service.dto.request.UserCreationRequest;
+import com.khuongdev.identity_service.dto.request.UserUpdateRequest;
+import com.khuongdev.identity_service.dto.respone.UserResponse;
+import com.khuongdev.identity_service.service.UserService;
+
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+
 @RestController
 // Định nghĩa /users để tránh lặp lại và không cần khai báo cho các mapping bên dưới
 @RequestMapping("/users")

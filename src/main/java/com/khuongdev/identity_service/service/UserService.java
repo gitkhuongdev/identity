@@ -1,5 +1,16 @@
 package com.khuongdev.identity_service.service;
 
+import java.util.HashSet;
+import java.util.List;
+
+import jakarta.validation.Valid;
+
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
 import com.khuongdev.identity_service.dto.request.UserCreationRequest;
 import com.khuongdev.identity_service.dto.request.UserUpdateRequest;
 import com.khuongdev.identity_service.dto.respone.UserResponse;
@@ -10,20 +21,11 @@ import com.khuongdev.identity_service.exception.ErrorCode;
 import com.khuongdev.identity_service.mapper.UserMapper;
 import com.khuongdev.identity_service.repository.RoleRepository;
 import com.khuongdev.identity_service.repository.UserRepository;
-import jakarta.validation.Valid;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.access.prepost.PostAuthorize;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
 
 // Đánh dấu đây là 1 service
 // Spring sẽ tạo bean cho class này, bean có scope mặc định là singleton.
@@ -33,22 +35,22 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserService {
-// Đây là field injection: Spring sẽ inject instance của UserRepository vào trường này.
-// Sau khi ứng dụng chạy, userRepository có thể dùng save, findById,
-//    @Autowired
+    // Đây là field injection: Spring sẽ inject instance của UserRepository vào trường này.
+    // Sau khi ứng dụng chạy, userRepository có thể dùng save, findById,
+    //    @Autowired
     UserRepository userRepository;
     UserMapper userMapper;
     RoleRepository roleRepository;
     PasswordEncoder passwordEncoder;
     // Method tạo User
     public UserResponse createUser(@Valid UserCreationRequest request) {
-//        User user = new User();
+        //        User user = new User();
         // Đoạn này GlobalHandler AppException sẽ xử lý để lấy mã lỗi để trả về cho api mã + message bị lỗi
-        // Kết hợp với hàm existByUsername trong userRepo để JPA check username trong request có tồn tại hay chưa rồi trả về message
+        // Kết hợp với hàm existByUsername trong userRepo để JPA check username trong request có tồn tại hay chưa rồi
+        // trả về message
         log.info("Service: create user");
 
-        if (userRepository.existsByUsername(request.getUsername()))
-            throw new AppException(ErrorCode.USER_EXISTED);
+        if (userRepository.existsByUsername(request.getUsername())) throw new AppException(ErrorCode.USER_EXISTED);
 
         User user = userMapper.toUser(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
@@ -56,12 +58,12 @@ public class UserService {
         HashSet<String> roles = new HashSet<>();
         roles.add(Role.USER.name());
 
-//        user.setRoles(roles);
+        //        user.setRoles(roles);
 
         return userMapper.toUserResponse(userRepository.save(user));
     }
 
-    public UserResponse getMyInfo(){
+    public UserResponse getMyInfo() {
         var context = SecurityContextHolder.getContext();
         String name = context.getAuthentication().getName();
 
@@ -93,9 +95,10 @@ public class UserService {
     }
 
     @PostAuthorize("returnObject.username == authentication.name")
-    public UserResponse getUser(String id){
+    public UserResponse getUser(String id) {
         log.info("In method get user by ID");
-//        Phần message này chỉ xuất hiện khi thêm phần xử lý trong exception
-        return userMapper.toUserResponse(userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found")));
+        //        Phần message này chỉ xuất hiện khi thêm phần xử lý trong exception
+        return userMapper.toUserResponse(
+                userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found")));
     }
 }

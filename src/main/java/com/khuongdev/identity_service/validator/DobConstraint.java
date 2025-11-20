@@ -1,9 +1,9 @@
 package com.khuongdev.identity_service.validator;
 
+import java.lang.annotation.*;
+
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
-
-import java.lang.annotation.*;
 
 // Target là phạm vi sử dụng (nằm trong biến, method,...)
 @Target({ElementType.FIELD})
@@ -20,5 +20,4 @@ public @interface DobConstraint {
     Class<?>[] groups() default {};
 
     Class<? extends Payload>[] payload() default {};
-
 }
