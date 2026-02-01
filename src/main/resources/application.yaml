@@ -6,10 +6,12 @@ server:
 # Config k?t n?i t?i DB
 spring:
   datasource:
-    url: 'jdbc:mysql://localhost:3306/identity_service'
+#    url: 'jdbc:mysql://localhost:3306/identity_service'
+    #Nếu trong config ko set giá trị thì sẽ dùng giá trị default sau dấu :
+    url: ${DBMS_CONNECTION:jdbc:mysql://localhost:3306/identity_service}
     driverClassName: "com.mysql.cj.jdbc.Driver"
-    username: root
-    password: root
+    username: ${DBMS_USERNAME:root}
+    password: ${DBMS_PASSWORD:root}
 # Config JPA để tự động tạo DB trong thực tế phải tạo bằng SQL
   jpa:
     hibernate:
