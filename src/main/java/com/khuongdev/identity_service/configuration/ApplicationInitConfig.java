@@ -32,7 +32,7 @@ public class ApplicationInitConfig {
     @ConditionalOnProperty(
             prefix = "spring",
             value = "datasource.driverClassName",
-            havingValue = "com.mysql.jdbc.Driver")
+            havingValue = "com.mysql.cj.jdbc.Driver")
     ApplicationRunner applicationRunner(UserRepository userRepository) {
         log.info("Init Application.....");
         return args -> {
